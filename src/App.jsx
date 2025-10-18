@@ -1,25 +1,28 @@
-import React, { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Gantt, Willow } from "wx-react-gantt";
 import "wx-react-gantt/dist/gantt.css";
-import * as XLSX from "xlsx";
 import html2canvas from "html2canvas";
-import { parseExcelToTasks } from "./parseExcelToTasks"; // from above
-
+import { parseExcelToTasks } from "./parseExcelToTasks";
 
 export default function App() {
-  const [tasks, setTasks] = useState([
-    {
-      id: 1,
-      text: "Example Task",
-      start: new Date(2024, 5, 11),
-      end: new Date(2024, 5, 15),
-      duration: 4,
-      progress: 50,
-      type: "task",
-    },
-  ]);
+  const [tasks, setTasks] = useState([]);
+  const [height, setHeight] = useState("90vh");
+  const [exporting, setExporting] = useState(false);
 
   const ganttRef = useRef(null);
+
+  useEffect(() => {
+    if (!exporting) return;
+    if (!ganttRef.current) return;
+
+    const timeout = setTimeout(async () => {
+      await handleExportImage();
+      setExporting(false);
+      setHeight("90vh");
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [exporting]);
 
   const links = [];
   const scales = [
@@ -55,16 +58,26 @@ export default function App() {
   };
 
 
+  const prepareForExport = () => {
+    setHeight("100%");
+    setExporting(true);
+  };
+
+
   const handleExportImage = async () => {
     if (!ganttRef.current) return;
 
     const tableEl = ganttRef.current.querySelector(".wx-table-wrapper");
     const chartEl = ganttRef.current.querySelector(".wx-content.x2-1dzadpy");
+    const chart2El = ganttRef.current.querySelector(".wx-chart.x2-1ff484e");
 
-    if (!tableEl || !chartEl) {
+    if (!tableEl || !chartEl || !chart2El) {
       alert("Elements not found yet!");
       return;
     }
+
+    chart2El.dispatchEvent(new Event("scroll", { bubbles: true }));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     const originalScrollTop = chartEl.scrollTop;
     const originalScrollLeft = chartEl.scrollLeft;
@@ -73,13 +86,9 @@ export default function App() {
     const originalOverflow = chartEl.style.overflow;
 
     const fullWidth = chartEl.scrollWidth;
-    const fullHeight = chartEl.scrollHeight;
 
     chartEl.style.width = `${fullWidth}px`;
-    chartEl.style.height = `${fullHeight}px`;
     chartEl.style.overflow = "visible";
-    chartEl.scrollTop = 0;
-    chartEl.scrollLeft = 0;
 
     const tableCanvas = await html2canvas(tableEl, { useCORS: true, scale: 2 });
     const chartCanvas = await html2canvas(chartEl, { useCORS: true, scale: 2 });
@@ -131,7 +140,7 @@ export default function App() {
         </label>
 
         <button
-          onClick={handleExportImage}
+          onClick={prepareForExport}
           style={{
             background: "#16a34a",
             color: "white",
@@ -148,7 +157,7 @@ export default function App() {
       <div
         ref={ganttRef}
         style={{
-          height: "80vh",
+          height: height,
           width: "100%",
           overflow: "auto",
           background: "white",
