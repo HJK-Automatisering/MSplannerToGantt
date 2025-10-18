@@ -1,6 +1,6 @@
 {
-  "homepage": "https://williamwoldum.github.io/MSplannerToGantt",
-  "name": "excel-to-gantt",
+  "homepage": "https://williamwoldum.github.io/MSplannerToGantt/",
+  "name": "msplanner-to-gantt",
   "private": true,
   "version": "0.0.0",
   "type": "module",
