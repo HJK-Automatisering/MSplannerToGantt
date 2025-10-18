@@ -45,5 +45,5 @@ After enabling GitHub Pages under your repo’s **Settings → Pages**,
 your site will be live at:
 
 ```
-https://williamwoldum.github.io/MSplannerToGantt
+https://HJK-Automatisering.github.io/MSplannerToGantt
 ```
