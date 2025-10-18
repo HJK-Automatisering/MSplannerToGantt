@@ -13,6 +13,7 @@ export function parseExcelToTasks(file) {
       const dataRows = rows.slice(headerIndex + 1);
 
       const tasks = [];
+      const links = [];
       const dispToTask = {}; // map dispositionsnummer → task object
 
       const getParentId = (disp) => {
@@ -47,7 +48,7 @@ export function parseExcelToTasks(file) {
       };
 
       dataRows.forEach((row) => {
-        const [nummer, disp, navn, assigned, start, end, ...rest] = row;
+        const [nummer, disp, navn, assigned, start, end, bucket, labels, progress, dependsIn, dependsOut, effort, effortDone, effortLeft, duration, milestone, notes, completed, checklistItems, priority, sprint, goal] = row;
         if (!nummer || !navn) return;
 
         const id = Number(nummer);
@@ -62,20 +63,38 @@ export function parseExcelToTasks(file) {
           if (!taskEnd) taskEnd = new Date(parentTask.start.getTime() + 24 * 60 * 60 * 1000);
         }
 
+        if (taskStart.getDate() === taskEnd.getDate() &&
+           taskStart.getMonth() === taskEnd.getMonth() &&
+           taskStart.getFullYear() === taskEnd.getFullYear()) {
+          taskEnd = new Date(taskEnd.getTime() + 24 * 60 * 60 * 1000);
+        }
+
+        let type = "task";
+        if (milestone === "Ja") type = "milestone";
+        else if (!parentTask) type = "summary";
+
         const task = {
           id,
           text: navn,
           start: taskStart,
           end: taskEnd,
           parent: parentId,
-          type: "task",
+          type,
+          open: parentTask ? false : true,
+          progress: progress * 100,
         };
 
         tasks.push(task);
         if (disp) dispToTask[disp.toString()] = task;
+
+        const dependencies = dependsIn ? dependsIn.toString().split(",").map(d => Number(d.slice(0, -2))) : [];
+        
+        dependencies.forEach((depDisp) => {
+          links.push({ id: links.length + 1, source: depDisp, target: task.id, type: "e2s" });
+        });
       });
 
-      resolve(tasks);
+      resolve({ tasks, links });
     };
 
     reader.readAsArrayBuffer(file);

@@ -6,6 +6,7 @@ import { parseExcelToTasks } from "./parseExcelToTasks";
 
 export default function App() {
   const [tasks, setTasks] = useState([]);
+  const [links, setLinks] = useState([]);
   const [height, setHeight] = useState("90vh");
   const [exporting, setExporting] = useState(false);
 
@@ -24,7 +25,6 @@ export default function App() {
     return () => clearTimeout(timeout);
   }, [exporting]);
 
-  const links = [];
   const scales = [
     { unit: "month", step: 1, format: "MMMM yyyy" },
     {
@@ -53,8 +53,9 @@ export default function App() {
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const parsed = await parseExcelToTasks(file);
-    setTasks(parsed);
+    const { tasks, links } = await parseExcelToTasks(file);
+    setTasks(tasks);
+    setLinks(links);
   };
 
 
