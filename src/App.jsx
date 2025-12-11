@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Gantt, Willow } from "wx-react-gantt";
 import "wx-react-gantt/dist/gantt.css";
+import "./theme.css"
 import html2canvas from "html2canvas";
 import { parseExcelToTasks } from "./parseExcelToTasks";
 
@@ -156,6 +157,7 @@ export default function App() {
       </div>
 
       <div
+        className="theme"
         ref={ganttRef}
         style={{
           height: height,

@@ -1,0 +1,10 @@
+/* https://docs.svar.dev/react/gantt/guides/styling */
+
+.theme {
+    --wx-gantt-task-color: #3983ebff; 
+    --wx-gantt-task-fill-color: #072c70ff;   
+    --wx-gantt-task-border-color: #072c70ff;
+
+    --wx-gantt-summary-color: #00ba94;       
+    --wx-gantt-summary-fill-color: #067a63;
+}
